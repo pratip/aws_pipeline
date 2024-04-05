@@ -43,10 +43,10 @@ jobs:
           sudo COMPOSER_MEMORY_LIMIT=-1 COMPOSER_ALLOW_SUPERUSER=1 COMPOSER_ROOT_VERSION=dev-master composer install
       - name: Setup database
         run: |
-          mysql -u root -p -e "CREATE DATABASE d10_aws;"
-          mysql -u root -p -e "CREATE USER 'db_admin'@'localhost' IDENTIFIED BY 'db_admin';"
-          mysql -u root -p -e "GRANT ALL PRIVILEGES on *.* to 'db_admin'@'localhost';"
-          mysql -u root -p -e "FLUSH PRIVILEGES;"
+          mysql -uroot -proot -e "CREATE DATABASE d10_aws;"
+          mysql -uroot -proot -e "CREATE USER 'db_admin'@'localhost' IDENTIFIED BY 'db_admin';"
+          mysql -uroot -proot -e "GRANT ALL PRIVILEGES on *.* to 'db_admin'@'localhost';"
+          mysql -uroot -proot -e "FLUSH PRIVILEGES;"
           ./vendor/bin/drush site-install -y standard --db-url=mysql://db_admin:db_admin@127.0.0.1:3306/d10_aws
       - name: Final status
         run: echo "🍏 This job's status is ${{ job.status }}."
