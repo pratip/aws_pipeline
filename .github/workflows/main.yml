@@ -35,11 +35,18 @@ jobs:
           sudo sed -i '172s/None/All/' /etc/apache2/apache2.conf
           sudo sed -i '12s/.*/DocumentRoot \/var\/www\/html\/web/' /etc/apache2/sites-available/000-default.conf
           sudo /etc/init.d/mysql start && sudo /etc/init.d/apache2 start
-      - name: Setup project configurations
+      - name: Build project dependencies
         run: |
           sudo rm /var/www/html/index.html
           sudo cp -a * /var/www/html
           cd /var/www/html
           sudo COMPOSER_MEMORY_LIMIT=-1 COMPOSER_ALLOW_SUPERUSER=1 COMPOSER_ROOT_VERSION=dev-master composer install
+      - name: Setup database
+        run: |
+          mysql -u root -p -e "CREATE DATABASE d10_aws;"
+          mysql -u root -p -e "CREATE USER 'db_admin'@'localhost' IDENTIFIED BY 'db_admin';"
+          mysql -u root -p -e "GRANT ALL PRIVILEGES on *.* to 'db_admin'@'localhost';"
+          mysql -u root -p -e "FLUSH PRIVILEGES;"
+          ./vendor/bin/drush site-install -y standard --db-url=mysql://db_admin:db_admin@127.0.0.1:3306/d10_aws
       - name: Final status
         run: echo "🍏 This job's status is ${{ job.status }}."
