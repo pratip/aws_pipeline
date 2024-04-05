@@ -3,7 +3,7 @@ run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on:
   pull_request:
     # Run for pull requests raised/edited against the "main" branch.
-    types: [synchronize, ready_for_review]
+    types: [synchronize]
     branches:
       - main
       - dev
