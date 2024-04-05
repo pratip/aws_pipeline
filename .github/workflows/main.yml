@@ -32,5 +32,8 @@ jobs:
           sudo apt-get install -y php8.1 apache2 mysql-server php-xml php-gd php8.1-mysql php-cli php-json php-mbstring php-xml php-pcov php-xdebug unzip
           sudo phpenmod xdebug
           sudo a2enmod rewrite
+          sudo sed -i '172s/None/All/' /etc/apache2/apache2.conf
+          sudo sed -i '12s/.*/DocumentRoot \/var\/www\/html\/web/' /etc/apache2/sites-available/000-default.conf
+          sudo /etc/init.d/mysql start && sudo /etc/init.d/apache2 start
       - name: Final status
         run: echo "🍏 This job's status is ${{ job.status }}."
