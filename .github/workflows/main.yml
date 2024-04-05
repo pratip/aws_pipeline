@@ -30,7 +30,7 @@ jobs:
         run: |
           sudo apt-get update -y && sudo apt-get upgrade -y && sudo apt-get dist-upgrade -y && sudo apt-get -y autoremove && sudo apt-get clean
           sudo apt-get install -y php8.1 apache2 mysql-server php-xml php-gd php8.1-mysql php-cli php-json php-mbstring php-xml php-pcov php-xdebug unzip
-          phpenmod xdebug
-          a2enmod rewrite
+          sudo phpenmod xdebug
+          sudo a2enmod rewrite
       - name: Final status
         run: echo "🍏 This job's status is ${{ job.status }}."
