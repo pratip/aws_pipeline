@@ -1,0 +1,2 @@
+# Ignore vendor directory in root since everything is managed with composer.
+vendor

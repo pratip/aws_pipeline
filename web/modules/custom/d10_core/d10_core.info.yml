@@ -1,0 +1,5 @@
+name: Custom Core
+description: A custom module that will play as the core for others.
+package: Custom
+type: module
+core_version_requirement: ^9.2 || ^10
