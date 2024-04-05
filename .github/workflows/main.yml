@@ -39,12 +39,7 @@ jobs:
         run: |
           sudo rm /var/www/html/index.html
           sudo cp -a * /var/www/html
-          sudo usermod -a -G www-data `whoami`
-          sudo chown root:root /var/www
-          sudo chmod 755 /var/www
-          sudo chown -R www-data:www-data /var/www/html
-          sudo chmod -R 774 /var/www/html
           cd /var/www/html
-          COMPOSER_MEMORY_LIMIT=-1 COMPOSER_ALLOW_SUPERUSER=1 COMPOSER_ROOT_VERSION=dev-master composer install
+          sudo COMPOSER_MEMORY_LIMIT=-1 COMPOSER_ALLOW_SUPERUSER=1 COMPOSER_ROOT_VERSION=dev-master composer install
       - name: Final status
         run: echo "🍏 This job's status is ${{ job.status }}."
