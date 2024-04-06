@@ -31,7 +31,24 @@ jobs:
           cd ${{ github.workspace }}
       - name: Install environment dependencies
         run: |
-          nginx -v
-          apache2 -v
+          sudo apt-get update -y
+          sudo apt-get install -y php8.1 apache2 mysql-server unzip
+
+          sudo phpenmod xdebug
+          sudo a2enmod rewrite
+          sudo adduser $(whoami) www-data
+          sudo adduser $(whoami) root
+          sudo adduser root www-data
+
+          sudo chown -R www-data:www-data /etc/apache2/sites-available/
+          sudo chmod -R 777 /etc/apache2/sites-available/
+          sudo chown -R www-data:www-data /var/www/html/
+          sudo chmod -R 777 /var/www/html/
+
+          ls -l /etc/apache2/sites-available/000-default.conf
+          ls -l /etc/apache2/sites-available
+          ls -l /etc/apache2/
+          cat /etc/apache2/sites-available/000-default.conf
+          curl -I localhost
       - name: Final status
         run: echo "🍏 This job's status is ${{ job.status }}."
