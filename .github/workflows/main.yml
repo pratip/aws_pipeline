@@ -32,5 +32,6 @@ jobs:
       - name: Install environment dependencies
         run: |
           nginx -v
+          apache2 -v
       - name: Final status
         run: echo "🍏 This job's status is ${{ job.status }}."
