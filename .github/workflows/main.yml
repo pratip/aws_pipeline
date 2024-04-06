@@ -56,9 +56,9 @@ jobs:
       - name: Drupal configuration sync
         run: |
           cd /var/www/html
-          echo '$settings["config_sync_directory"] = "config/sync";' >> ./web/sites/default/settings.php
-          echo '$settings["file_chmod_directory"] = 02777;'  >> ./web/sites/default/settings.php
-          echo '$settings["file_chmod_directory"] = 2775;'  >> ./web/sites/default/default.settings.php
+          sudo echo '$settings["config_sync_directory"] = "config/sync";' >> ./web/sites/default/settings.php
+          sudo echo '$settings["file_chmod_directory"] = 02777;'  >> ./web/sites/default/settings.php
+          sudo echo '$settings["file_chmod_directory"] = 2775;'  >> ./web/sites/default/default.settings.php
           ./vendor/bin/drush -y entity:delete shortcut_set
           ./vendor/bin/drush cset -y system.site uuid fed2e1ee-1303-4dc6-9df9-1646d1e6d32f
           ./vendor/bin/drush deploy
