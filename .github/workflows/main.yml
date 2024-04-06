@@ -41,7 +41,6 @@ jobs:
       - name: Build project dependencies
         run: |
           sudo rm /var/www/html/index.html
-          sudo cp -a * /var/www/html
           pwd
           ls -al
           sudo COMPOSER_MEMORY_LIMIT=-1 COMPOSER_ALLOW_SUPERUSER=1 COMPOSER_ROOT_VERSION=dev-master composer install
