@@ -47,6 +47,8 @@ jobs:
           mysql -uroot -proot -e "CREATE USER 'db_admin'@'localhost' IDENTIFIED BY 'db_admin';"
           mysql -uroot -proot -e "GRANT ALL PRIVILEGES on *.* to 'db_admin'@'localhost';"
           mysql -uroot -proot -e "FLUSH PRIVILEGES;"
+          pwd
+          ls -al
           ./vendor/bin/drush site-install -y standard --db-url=mysql://db_admin:db_admin@127.0.0.1:3306/d10_aws
       - name: Final status
         run: echo "🍏 This job's status is ${{ job.status }}."
