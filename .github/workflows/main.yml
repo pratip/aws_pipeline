@@ -13,9 +13,6 @@ on:
 jobs:
   Build-Changes:
     runs-on: ubuntu-22.04
-    defaults:
-      run:
-        working-directory: /var/www/html
     steps:
       - name: Basic Setup
         run: |
@@ -31,24 +28,30 @@ jobs:
           cd ${{ github.workspace }}
       - name: Install environment dependencies
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y php8.1 apache2 mysql-server unzip
-
+          sudo apt-get update -y && sudo apt-get upgrade -y && sudo apt-get dist-upgrade -y && sudo apt-get -y autoremove && sudo apt-get clean
+          sudo apt-get install -y php8.1 apache2 mysql-server php-xml php-gd php8.1-mysql php-cli php-json php-mbstring php-xml php-pcov php-xdebug unzip
           sudo phpenmod xdebug
           sudo a2enmod rewrite
-          sudo adduser $(whoami) www-data
-          sudo adduser $(whoami) root
-          sudo adduser root www-data
-
-          sudo chown -R www-data:www-data /etc/apache2/sites-available/
-          sudo chmod -R 777 /etc/apache2/sites-available/
-          sudo chown -R www-data:www-data /var/www/html/
-          sudo chmod -R 777 /var/www/html/
-
-          ls -l /etc/apache2/sites-available/000-default.conf
-          ls -l /etc/apache2/sites-available
-          ls -l /etc/apache2/
-          cat /etc/apache2/sites-available/000-default.conf
-          curl -I localhost
+          sudo sed -i '172s/None/All/' /etc/apache2/apache2.conf
+          sudo sed -i '12s/.*/DocumentRoot \/var\/www\/html\/web/' /etc/apache2/sites-available/000-default.conf
+          sudo /etc/init.d/mysql start && sudo /etc/init.d/apache2 start
+      - name: Build project dependencies
+        run: |
+          sudo rm /var/www/html/index.html
+          sudo cp -a * /var/www/html
+          cd /var/www/html
+          pwd
+          ls -al
+          sudo COMPOSER_MEMORY_LIMIT=-1 COMPOSER_ALLOW_SUPERUSER=1 COMPOSER_ROOT_VERSION=dev-master composer install
+      - name: Setup database
+        run: |
+          cd /var/www/html
+          mysql -uroot -proot -e "CREATE DATABASE d10_aws;"
+          mysql -uroot -proot -e "CREATE USER 'db_admin'@'localhost' IDENTIFIED BY 'db_admin';"
+          mysql -uroot -proot -e "GRANT ALL PRIVILEGES on *.* to 'db_admin'@'localhost';"
+          mysql -uroot -proot -e "FLUSH PRIVILEGES;"
+          pwd
+          ls -al
+          ./vendor/bin/drush site-install -y standard --db-url=mysql://db_admin:db_admin@127.0.0.1:3306/d10_aws
       - name: Final status
         run: echo "🍏 This job's status is ${{ job.status }}."
