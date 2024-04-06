@@ -37,7 +37,7 @@ jobs:
           sudo /etc/init.d/mysql start && sudo /etc/init.d/apache2 start
       - name: Build project dependencies
         run: |
-          sudo rm /var/www/html/index.html
+          sudo rm /var/www/html/index.html /var/www/html/index.nginx-debian.html
           sudo cp -a * /var/www/html
           cd /var/www/html
           pwd
@@ -53,5 +53,13 @@ jobs:
           pwd
           ls -al
           ./vendor/bin/drush site-install -y standard --db-url=mysql://db_admin:db_admin@127.0.0.1:3306/d10_aws
+      - name: Drupal configuration sync
+        run: |
+          echo '$settings["config_sync_directory"] = "config/sync";' >> ./web/sites/default/settings.php
+          echo '$settings["file_chmod_directory"] = 02777;'  >> ./web/sites/default/settings.php
+          echo '$settings["file_chmod_directory"] = 2775;'  >> ./web/sites/default/default.settings.php
+          ./vendor/bin/drush -y entity:delete shortcut_set
+          ./vendor/bin/drush cset -y system.site uuid fed2e1ee-1303-4dc6-9df9-1646d1e6d32f
+          ./vendor/bin/drush deploy
       - name: Final status
         run: echo "🍏 This job's status is ${{ job.status }}."
