@@ -32,7 +32,6 @@ jobs:
           sudo apt-get install -y php8.1 libapache2-mod-php8.1 apache2 mysql-server php-xml php-gd php8.1-mysql php-cli php-json php-mbstring php-xml php-pcov php-xdebug unzip
           sudo phpenmod xdebug
           sudo a2enconf php8.1-fpm
-          sudo a2enmod php8.1
           sudo a2enmod rewrite
           sudo sed -i '172s/None/All/' /etc/apache2/apache2.conf
           sudo sed -i '12s/.*/DocumentRoot \/var\/www\/html\/web/' /etc/apache2/sites-available/000-default.conf
