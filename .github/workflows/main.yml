@@ -56,11 +56,9 @@ jobs:
           cd /var/www/html
           ls -al ./web/sites/default
           whoami
-          sudo echo "New file" > tesfile.txt
-          sudo echo "New line" >> testfile.txt
-          sudo echo '$settings["config_sync_directory"] = "config/sync";' >> ./web/sites/default/settings.php
-          sudo echo '$settings["file_chmod_directory"] = 02777;'  >> ./web/sites/default/settings.php
-          sudo echo '$settings["file_chmod_directory"] = 2775;'  >> ./web/sites/default/default.settings.php
+          echo '$settings["config_sync_directory"] = "config/sync";' | sudo tee -a ./web/sites/default/settings.php
+          echo '$settings["file_chmod_directory"] = 02777;' | sudo tee -a ./web/sites/default/settings.php
+          echo '$settings["file_chmod_directory"] = 2775;' | sudo tee -a ./web/sites/default/default.settings.php
           ./vendor/bin/drush -y entity:delete shortcut_set
           ./vendor/bin/drush cset -y system.site uuid fed2e1ee-1303-4dc6-9df9-1646d1e6d32f
           ./vendor/bin/drush deploy
