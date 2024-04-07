@@ -68,6 +68,7 @@ jobs:
           sudo chmod -R 777 ./web/sites/simpletest
           sudo cp ./sample_files/phpunit.sample.xml ./web/sites
           sudo mv ./web/sites/phpunit.sample.xml ./web/sites/phpunit.xml
-          curl http://127.0.0.1
+          ./vendor/bin/phpunit -c ./web/sites ./web/modules/custom
+          ./vendor/bin/phpcs --standard=Drupal,DrupalPractice ./web/modules/custo
       - name: Final status
         run: echo "🍏 This job's status is ${{ job.status }}."
