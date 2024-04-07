@@ -50,12 +50,14 @@ jobs:
           mysql -uroot -proot -e "CREATE USER 'db_admin'@'localhost' IDENTIFIED BY 'db_admin';"
           mysql -uroot -proot -e "GRANT ALL PRIVILEGES on *.* to 'db_admin'@'localhost';"
           mysql -uroot -proot -e "FLUSH PRIVILEGES;"
-          pwd
-          ls -al
           ./vendor/bin/drush site-install -y standard --db-url=mysql://db_admin:db_admin@127.0.0.1:3306/d10_aws
       - name: Drupal configuration sync
         run: |
           cd /var/www/html
+          ls -al ./web/sites/default
+          whoami
+          sudo echo "New file" > tesfile.txt
+          sudo echo "New line" >> testfile.txt
           sudo echo '$settings["config_sync_directory"] = "config/sync";' >> ./web/sites/default/settings.php
           sudo echo '$settings["file_chmod_directory"] = 02777;'  >> ./web/sites/default/settings.php
           sudo echo '$settings["file_chmod_directory"] = 2775;'  >> ./web/sites/default/default.settings.php
