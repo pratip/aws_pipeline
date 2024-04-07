@@ -54,13 +54,20 @@ jobs:
       - name: Drupal configuration sync
         run: |
           cd /var/www/html
-          ls -al ./web/sites/default
-          whoami
           echo '$settings["config_sync_directory"] = "config/sync";' | sudo tee -a ./web/sites/default/settings.php
           echo '$settings["file_chmod_directory"] = 02777;' | sudo tee -a ./web/sites/default/settings.php
           echo '$settings["file_chmod_directory"] = 2775;' | sudo tee -a ./web/sites/default/default.settings.php
           ./vendor/bin/drush -y entity:delete shortcut_set
           ./vendor/bin/drush cset -y system.site uuid fed2e1ee-1303-4dc6-9df9-1646d1e6d32f
           ./vendor/bin/drush deploy
+      - name: Run build tests
+        run: |
+          cd /var/www/html
+          sudo mkdir -p ./web/sites/simpletest/browser_output
+          sudo chmod -R 777 ./web/sites/simpletest
+          sudo cp ./sample_files/phpunit.sample.xml ./web/sites
+          sudo mv ./web/sites/phpunit.sample.xml ./web/sites/phpunit.xml
+          ./vendor/bin/phpunit -c ./web/sites ./web/modules/custom
+          ./vendor/bin/phpcs --standard=Drupal,DrupalPractice ./web/modules/custom
       - name: Final status
         run: echo "🍏 This job's status is ${{ job.status }}."
