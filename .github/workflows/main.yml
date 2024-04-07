@@ -69,6 +69,6 @@ jobs:
           sudo cp ./sample_files/phpunit.sample.xml ./web/sites
           sudo mv ./web/sites/phpunit.sample.xml ./web/sites/phpunit.xml
           ./vendor/bin/phpunit -c ./web/sites ./web/modules/custom
-          ./vendor/bin/phpcs --standard=Drupal,DrupalPractice ./web/modules/custo
+          ./vendor/bin/phpcs --standard=Drupal,DrupalPractice ./web/modules/custom
       - name: Final status
         run: echo "🍏 This job's status is ${{ job.status }}."
