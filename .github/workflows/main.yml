@@ -28,7 +28,7 @@ jobs:
           cd ${{ github.workspace }}
       - name: Install environment dependencies
         run: |
-          apt-get update -y && sudo apt-get upgrade -y && sudo apt-get dist-upgrade -y && sudo apt-get -y autoremove && sudo apt-get clean
+          sudo apt-get update -y && sudo apt-get upgrade -y && sudo apt-get dist-upgrade -y && sudo apt-get -y autoremove && sudo apt-get clean
           sudo apt-get install -y php8.1 libapache2-mod-php8.1 apache2 mysql-server php-xml php-gd php8.1-mysql php-cli php-json php-mbstring php-xml php-pcov php-xdebug unzip
           sudo phpenmod xdebug
           sudo a2enconf php8.1-fpm
@@ -41,8 +41,6 @@ jobs:
           sudo rm /var/www/html/index.html /var/www/html/index.nginx-debian.html
           sudo cp -a * /var/www/html
           cd /var/www/html
-          pwd
-          ls -al
           sudo COMPOSER_MEMORY_LIMIT=-1 COMPOSER_ALLOW_SUPERUSER=1 COMPOSER_ROOT_VERSION=dev-master composer install
       - name: Setup database
         run: |
@@ -55,7 +53,7 @@ jobs:
       - name: Drupal configuration sync
         run: |
           cd /var/www/html
-          echo '$settings["config_sync_directory"] = "config/sync";' | sudo tee -a ./web/sites/default/settings.php
+          echo '$settings["config_sync_directory"] = "config/sync";' | tee -a ./web/sites/default/settings.php
           echo '$settings["file_chmod_directory"] = 02777;' | sudo tee -a ./web/sites/default/settings.php
           echo '$settings["file_chmod_directory"] = 2775;' | sudo tee -a ./web/sites/default/default.settings.php
           ./vendor/bin/drush -y entity:delete shortcut_set
