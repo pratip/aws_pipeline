@@ -1,1 +1,1 @@
-# This is a sample application to validate AWS CodePipeline
+This is a sample Drupal project to test CI/CD in AWS.

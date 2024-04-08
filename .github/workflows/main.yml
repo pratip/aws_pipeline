@@ -1,18 +1,74 @@
 name: GitHub Actions Demo
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: [push]
+on:
+  pull_request:
+    # Run for pull requests raised/edited against the "main" branch.
+    types: [synchronize]
+    branches:
+      - main
+      - dev
+      - qa
+      - uat
+      - prod
 jobs:
-  Explore-GitHub-Actions:
-    runs-on: ubuntu-latest
+  Build-Changes:
+    runs-on: ubuntu-22.04
     steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Basic Setup
+        run: |
+          echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+          echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+          echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
+      - name: Change directory to checkout out code.
         run: |
-          ls ${{ github.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+          echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+          echo "🖥️ The workflow is now ready to test your code on the runner."
+          cd ${{ github.workspace }}
+      - name: Install environment dependencies
+        run: |
+          sudo apt-get update -y && sudo apt-get upgrade -y && sudo apt-get dist-upgrade -y && sudo apt-get -y autoremove && sudo apt-get clean
+          sudo apt-get install -y php8.1 libapache2-mod-php8.1 apache2 mysql-server php-xml php-gd php8.1-mysql php-cli php-json php-mbstring php-xml php-pcov php-xdebug unzip
+          sudo phpenmod xdebug
+          sudo a2enconf php8.1-fpm
+          sudo a2enmod rewrite
+          sudo sed -i '172s/None/All/' /etc/apache2/apache2.conf
+          sudo sed -i '12s/.*/DocumentRoot \/var\/www\/html\/web/' /etc/apache2/sites-available/000-default.conf
+          sudo /etc/init.d/mysql start && sudo /etc/init.d/apache2 start
+      - name: Build project dependencies
+        run: |
+          sudo rm /var/www/html/index.html /var/www/html/index.nginx-debian.html
+          sudo cp -a * /var/www/html
+          cd /var/www/html
+          pwd
+          ls -al
+          sudo COMPOSER_MEMORY_LIMIT=-1 COMPOSER_ALLOW_SUPERUSER=1 COMPOSER_ROOT_VERSION=dev-master composer install
+      - name: Setup database
+        run: |
+          cd /var/www/html
+          mysql -uroot -proot -e "CREATE DATABASE d10_aws;"
+          mysql -uroot -proot -e "CREATE USER 'db_admin'@'localhost' IDENTIFIED BY 'db_admin';"
+          mysql -uroot -proot -e "GRANT ALL PRIVILEGES on *.* to 'db_admin'@'localhost';"
+          mysql -uroot -proot -e "FLUSH PRIVILEGES;"
+          ./vendor/bin/drush site-install -y standard --db-url=mysql://db_admin:db_admin@127.0.0.1:3306/d10_aws
+      - name: Drupal configuration sync
+        run: |
+          cd /var/www/html
+          echo '$settings["config_sync_directory"] = "config/sync";' | sudo tee -a ./web/sites/default/settings.php
+          echo '$settings["file_chmod_directory"] = 02777;' | sudo tee -a ./web/sites/default/settings.php
+          echo '$settings["file_chmod_directory"] = 2775;' | sudo tee -a ./web/sites/default/default.settings.php
+          ./vendor/bin/drush -y entity:delete shortcut_set
+          ./vendor/bin/drush cset -y system.site uuid fed2e1ee-1303-4dc6-9df9-1646d1e6d32f
+          ./vendor/bin/drush deploy
+      - name: Run build tests
+        run: |
+          cd /var/www/html
+          sudo mkdir -p ./web/sites/simpletest/browser_output
+          sudo chmod -R 777 ./web/sites/simpletest
+          sudo cp ./sample_files/phpunit.sample.xml ./web/sites
+          sudo mv ./web/sites/phpunit.sample.xml ./web/sites/phpunit.xml
+          ./vendor/bin/phpunit -c ./web/sites ./web/modules/custom
+          ./vendor/bin/phpcs --standard=Drupal,DrupalPractice ./web/modules/custom
+      - name: Final status
+        run: echo "🍏 This job's status is ${{ job.status }}."

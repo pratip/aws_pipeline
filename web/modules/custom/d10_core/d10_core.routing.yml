@@ -1,0 +1,7 @@
+d10_core.play_page:
+  path: '/play-with-me'
+  defaults:
+    _controller: '\Drupal\d10_core\Controller\D10CoreController::playWithMe'
+    _title: 'Play With Me'
+  requirements:
+    _permission: 'access content'

@@ -1,0 +1,54 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - echo Install phase started.
+    runtime-versions:
+      php: 8.1
+  pre_build:
+    commands:
+      - echo Pre-Build phase started.
+      - apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y && apt-get -y autoremove && apt-get clean
+      - apt-get install -y php8.1 apache2 mysql-server php-xml php-gd php8.1-mysql php-cli php-json php-mbstring php-xml php-pcov php-xdebug unzip
+      - phpenmod xdebug
+      - a2enmod rewrite
+      - sed -i '172s/None/All/' /etc/apache2/apache2.conf
+      - sed -i '12s/.*/DocumentRoot \/var\/www\/html\/web/' /etc/apache2/sites-available/000-default.conf
+      - /etc/init.d/mysql start && /etc/init.d/apache2 start
+  build:
+    commands:
+      - rm /var/www/html/index.html
+      - cp -a * /var/www/html
+      - cd /var/www/html
+      - echo Building composer dependencies.
+      - COMPOSER_MEMORY_LIMIT=-1 COMPOSER_ALLOW_SUPERUSER=1 COMPOSER_ROOT_VERSION=dev-master composer install
+      - echo Creating database for website.
+      - mysql -u root -p -e "CREATE DATABASE d10;"
+      - echo Creating database user.
+      - mysql -u root -p -e "CREATE USER 'db_admin'@'localhost' IDENTIFIED BY 'db_admin';"
+      - echo Grant privileges to this user.
+      - mysql -u root -p -e "GRANT ALL PRIVILEGES on *.* to 'db_admin'@'localhost';"
+      - mysql -u root -p -e "FLUSH PRIVILEGES;"
+      - echo Installing basic website.
+      - ./vendor/bin/drush site-install -y standard --db-url=mysql://db_admin:db_admin@127.0.0.1:3306/d10
+      - echo Removing config directory settings from settings file which is in the last line.
+      - sed -i '$ d' web/sites/default/settings.php
+      - echo Adding config directory so that the configurations can be imported properly.
+      - echo '$settings["config_sync_directory"] = "config/sync";' >> ./web/sites/default/settings.php
+      - echo '$settings["file_chmod_directory"] = 02777;'  >> ./web/sites/default/settings.php
+      - echo '$settings["file_chmod_directory"] = 2775;'  >> ./web/sites/default/default.settings.php
+      - echo Run a full deploy based on set configurations.
+      - ./vendor/bin/drush -y entity:delete shortcut_set
+      - ./vendor/bin/drush cset -y system.site uuid fed2e1ee-1303-4dc6-9df9-1646d1e6d32f
+      - ./vendor/bin/drush deploy
+  post_build:
+    commands:
+      - echo Post-Build phase started.
+      - echo Create directory for unit tests.
+      - mkdir -p ./web/sites/simpletest/browser_output
+      - chmod -R 777 ./web/sites/simpletest
+      - echo Run unit tests.
+      - cp ./sample_files/phpunit.sample.xml ./web/sites
+      - mv ./web/sites/phpunit.sample.xml ./web/sites/phpunit.xml
+      - ./vendor/bin/phpunit -c ./web/sites ./web/modules/custom
+
